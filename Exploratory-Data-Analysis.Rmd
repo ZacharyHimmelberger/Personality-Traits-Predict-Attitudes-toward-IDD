@@ -1,0 +1,88 @@
+---
+title: "Exploratory Data Analysis"
+author: "Zachary Himmelberger"
+date: "2/15/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Import Packages
+
+```{r}
+library(knitr)
+library(psych)
+```
+
+# Import Data
+
+```{r}
+source("Data-Processing.R")
+```
+
+# Exploratory Data Analysis
+
+We will first try to get a basic understanding of the DataFrame. 
+
+```{r}
+glimpse(analysis.df)
+```
+
+We can now begin to examine the variables. Let's start with some basic summaries.
+
+```{r}
+summary(df)
+```
+
+Age and quantity have some missing values. Otherwise, nothing much stands out.
+
+Let's look at a correlation matrix for the quantitative variables. Note that anything about .13 is statistically significant.
+
+```{r}
+cor.matrix <- df %>%
+  select(where(is.numeric)) %>%
+  cor(use="pairwise.complete.obs") %>%
+  round(2)
+
+kable(cor.matrix, format="html", align="c")
+```
+
+Obviously there is a lot to go through with all of those correlations. Let's examine the correlation table just among the personality variables and attitude. 
+
+```{r}
+cor.matrix <- df %>%
+  select(attitude, openness, conscientiousness, extroversion,
+         agreeableness, neuroticism) %>%
+  cor(use="pairwise.complete.obs") %>%
+  round(2)
+
+kable(cor.matrix, format="html", align="c")
+```
+
+Attitude is moderately correlated with openness and agreeableness. It is also weakly correlated with extroversion. Let's look at how the attitude subscales correlate with the total score. 
+
+```{r}
+cor.matrix <- df %>%
+  select(attitude, integration, social.distance, private.rights,
+         subtle.derogatory.beliefs) %>%
+  cor(use="pairwise.complete.obs") %>%
+  round(2)
+
+kable(cor.matrix, format="html", align="c")
+```
+
+All four subscales correlate very strongly (greater than .8) with the total score and strongly (greater than .5) with each other.
+
+We should also look at the potential covariates. The two that come to mind based on previous research are gender (McManus et al.) and race (Keith et al.). 
+
+```{r}
+ggplot(data=df, aes(x=attitude, fill=gender)) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(data=df, aes(x=attitude, fill=ethnicity)) +
+  geom_boxplot()
+```
+
+It seems like gender may be a useful covariate. It seems to be related to attitudes. It may also be worthwhile to include race/ethnicity as a covariate. However, two groups make up most of our data. Combining the other ethnicities as their own group makes less sense, given how spread out they are. We may want to collapse across some groups (or white v. non-white as Keith et al. did), if only for practical reasons.
