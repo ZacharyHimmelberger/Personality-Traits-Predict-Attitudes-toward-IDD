@@ -7,6 +7,7 @@ library(readxl)
 library(tidyverse)
 
 # Load Data
+
 raw.df <- read_excel("data/attitudes_final.xlsx", 
                      sheet=1, 
                      skip=1)
