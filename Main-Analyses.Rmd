@@ -1,0 +1,136 @@
+---
+title: "Main Analyses"
+author: "Zachary Himmelberger"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Import Packages
+
+```{r}
+library(ppcor)
+library(lavaan)
+```
+
+# Import Data
+
+```{r}
+source("Data-Processing.R")
+```
+
+# Linear Regression of Substantive Predictors on MRAI-R Total Scores
+
+We will start by subsetting the data to only include the predictors, then fitting the model. 
+
+```{r}
+regression.model.df <- analysis.df %>%
+  select(attitude, gender.male, gender.non.binary, non.white, social.desirability.c,
+         quantity.c, quality.c, knowledge.c, openness.c, 
+         conscientiousness.c, extroversion.c, agreeableness.c, neuroticism.c)
+
+regression.model <- lm(attitude ~ ., data = regression.model.df)
+```
+
+Plot the model assumptions. 
+
+``` {r}
+plot(regression.model)
+```
+
+The model assumptions appear to be reasonable. Now we can look at the model coefficients.
+
+```{r}
+summary(regression.model)
+```
+
+Let's look at the standardized predictors to see the relative strength of each predictor. 
+
+```{r}
+# create a temporary DataFrame to standardize quantitative predictors
+temp2 <- df %>%
+  select(social.desirability, openness, conscientiousness, extroversion,
+         agreeableness, neuroticism,  quantity, quality,
+         knowledge) %>%
+  scale(center=TRUE, scale=TRUE)
+
+# add a .s after the name of each predictor to identify it as standardized
+temp2 <- as.data.frame(temp2, row.names = NULL)
+temp2 <- set_names(temp2, paste0(names(temp2), ".s"))
+
+# merge dataframes and recode gender and ethnicity 
+standardized.df <- df %>%
+  mutate(male = recode(gender,
+                       "male" = 1,
+                       .default = 0)) %>%
+  mutate(non.white = recode(ethnicity,
+                       "white" = 0,
+                       .default = 1)) %>%
+  select(gender, attitude, male, non.white) %>%
+  bind_cols(temp2) %>%
+  filter(gender != "non-binary") %>%
+  drop_na(attitude, social.desirability.s, openness.s,
+                       conscientiousness.s, extroversion.s, agreeableness.s, neuroticism.s,
+                       quantity.s, quality.s, knowledge.s)
+
+# create the new dataframes with the standardized predictors
+standardized.regression.model.df <- standardized.df %>%
+  select(attitude, male, non.white, social.desirability.s,
+         quantity.s, quality.s, knowledge.s, openness.s, 
+         conscientiousness.s, extroversion.s, agreeableness.s, neuroticism.s)
+
+# fit the model
+standardized.regression.model <- lm(attitude ~ ., data = standardized.regression.model.df)
+
+# examine model coefficients
+summary(standardized.regression.model)
+```
+
+Finally, we can look at the partial correlations for each predictor. 
+
+```{r}
+pcor(regression.model.df)
+```
+
+
+# Mediation Model
+
+We will create the mediation model and fit it to the data. 
+
+``` {r}
+# set seed for reproducibility
+set.seed(760120)
+
+med_model <- '
+  # direct effects
+  quality ~ b1 * openness + b2 * agreeableness
+  attitude ~ b3 * openness + b4 * agreeableness + b5 * quality
+  # indirect effects
+  indirect_openness := b1 * b5
+  indirect_agreeableness := b2 * b5
+  # total effects
+  total_openness := b3 + (b1 * b5)
+  total_agreeableness := b4 + (b2 * b5)
+'
+
+med_model_fit <- sem(med_model, data = analysis.df,
+                         se = "bootstrap", bootstrap = 10000)
+```
+
+Examine the overall model fit. 
+
+```{r}
+inspect(med_model_fit, "r2")
+```
+
+Examine the unstandardized model coefficients. 
+
+```{r}
+summary(med_model_fit, fit.measures=TRUE, ci=TRUE)
+```
+
+Examine the standardized model coefficients.
+
+```{r}
+summary(med_model_fit, fit.measures=TRUE, ci=TRUE, standardized = TRUE)
+```
