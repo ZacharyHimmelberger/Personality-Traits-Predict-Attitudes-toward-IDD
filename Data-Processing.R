@@ -8,7 +8,7 @@ library(tidyverse)
 
 # Load Data
 
-raw.df <- read_excel("/Users/zach.himmelberger/OneDrive - Maryville College/Research/Personality and Attitudes/attitudes_final.xlsx", 
+raw.df <- read_excel("data/attitudes_final.xlsx", 
                      sheet=1, 
                      skip=1)
 head(raw.df, n=10)

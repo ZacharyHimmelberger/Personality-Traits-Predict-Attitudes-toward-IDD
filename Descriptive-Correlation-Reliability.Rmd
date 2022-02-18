@@ -1,0 +1,205 @@
+---
+title: "Descriptive Statistics, Bivariate Correlations, and Reliability Coefficients"
+author: "Zachary Himmelberger"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Import Packages
+
+```{r}
+library(psych)
+```
+
+# Import Data
+
+```{r}
+source("Data-Processing.R")
+```
+
+# Descriptive Statistics
+
+For the participant section. 
+
+``` {r}
+describe(analysis.df$age)
+table(analysis.df$gender)
+table(analysis.df$ethnicity)
+```
+
+Descriptive statistics for Table 1. 
+
+``` {r}
+describe(analysis.df$attitude)
+describe(analysis.df$social.desirability)
+describe(analysis.df$quantity)
+describe(analysis.df$quality)
+describe(analysis.df$knowledge)
+describe(analysis.df$openness)
+describe(analysis.df$conscientiousness)
+describe(analysis.df$extroversion)
+describe(analysis.df$agreeableness)
+describe(analysis.df$neuroticism)
+```
+
+# Bivariate Correlations
+
+Correlations for Table 2. Note that all correlations above .132 are significant at the .05 level and all correlations above .173 are significant at the .01 level.
+
+``` {r}
+analysis.df %>%
+  select(attitude, social.desirability, quantity, quality, 
+         knowledge, openness, conscientiousness, extroversion,
+         agreeableness, neuroticism) %>%
+  cor() %>%
+  round(digits=2)
+```
+
+# Reliability Coefficients
+
+Cronbach's alpha for each scale.
+
+``` {r}
+chronbach.df <- raw.df %>%
+  drop_na(attitude, social.desirability, openness,
+                       conscientiousness, extroversion, agreeableness, neuroticism,
+                       quantity, quality, knowledge)
+```
+
+## BFI subscales
+
+Openness = .74
+
+```{r}
+chronbach.df %>%
+  select(BFI_5, BFI_10, BFI_15, BFI_20, 
+         BFI_25, BFI_30, BFI_35.r, BFI_40, 
+         BFI_41.r, BFI_44) %>%
+  psych::alpha()
+```
+
+Conscientiousness = .76
+
+```{r}
+chronbach.df %>%
+  select(BFI_3, BFI_8.r, BFI_13, BFI_18.r, 
+         BFI_23.r, BFI_28, BFI_33, BFI_38, 
+         BFI_43.r) %>%
+  psych::alpha()
+```
+
+Extroversion = .86
+
+```{r}
+chronbach.df %>%
+  select(BFI_1, BFI_6.r, BFI_11, BFI_16, 
+         BFI_21.r, BFI_26, BFI_31.r, BFI_36) %>%
+  psych::alpha()
+```
+
+Agreeableness = .78
+
+```{r}
+chronbach.df %>%
+  select(BFI_2.r, BFI_7, BFI_12.r, BFI_17, 
+         BFI_22, BFI_27.r, BFI_32, BFI_37.r, 
+         BFI_42) %>%
+  psych::alpha()
+```
+
+Neuroticism = .82
+
+```{r}
+chronbach.df %>%
+  select(BFI_4, BFI_9.r, BFI_14, BFI_19, 
+         BFI_24.r, BFI_29, BFI_34.r, BFI_39) %>%
+  psych::alpha()
+```
+
+## MRAI-R (Attitudes)
+
+Overall = .88
+
+```{r}
+chronbach.df %>%
+  select(Attitudes_1.r, Attitudes_2, Attitudes_3,
+         Attitudes_4.r, Attitudes_5, Attitudes_6.r,
+         Attitudes_7.r, Attitudes_8, Attitudes_9.r,
+         Attitudes_10.r, Attitudes_11, Attitudes_12.r,
+         Attitudes_13.r, Attitudes_14, Attitudes_15.r,
+         Attitudes_16.r, Attitudes_17, Attitudes_18.r,
+         Attitudes_19, Attitudes_20.r, Attitudes_21.r,
+         Attitudes_22.r, Attitudes_23.r, Attitudes_24,
+         Attitudes_25.r, Attitudes_26.r, Attitudes_27.r,
+         Attitudes_28, Attitudes_29) %>%
+  psych::alpha()
+```
+
+Integration-segregation = .77
+
+```{r}
+chronbach.df %>%
+  select(Attitudes_1.r, Attitudes_2, Attitudes_7.r, Attitudes_13.r, 
+         Attitudes_17, Attitudes_23.r, Attitudes_29) %>%
+  psych::alpha()
+```
+
+Social distance = .77
+
+```{r}
+chronbach.df %>%
+  select(Attitudes_3, Attitudes_5, Attitudes_11, Attitudes_15.r,
+         Attitudes_18.r, Attitudes_19, Attitudes_24, Attitudes_27.r) %>%
+  psych::alpha()
+```
+
+Private rights = .58
+
+```{r}
+chronbach.df %>%
+  select(Attitudes_6.r, Attitudes_8, Attitudes_12.r, Attitudes_14,
+         Attitudes_20.r, Attitudes_22.r, Attitudes_28) %>%
+  psych::alpha()
+```
+
+Subtle derogatory beliefs = .64
+
+```{r}
+chronbach.df %>%
+  select(Attitudes_4.r, Attitudes_9.r, Attitudes_10.r, Attitudes_16.r, 
+         Attitudes_21.r, Attitudes_25.r, Attitudes_26.r) %>%
+  psych::alpha()
+```
+
+## Contact and Knowledge
+
+Quality of contact = .89
+
+```{r}
+chronbach.df %>%
+  select(Quality_2, Quality_3, Quality_4,
+         Quality_5, Quality_6, Quality_7.r, Quality_8.r) %>%
+  psych::alpha()
+```
+
+Quantity of contact = .78
+
+```{r}
+chronbach.df %>%
+  select(Quantity_1, Quantity_2, Quantity_3, Quantity_4.r,
+         Quantity_5, Quantity_6, Quantity_7, Quantity_8,
+         Quantity_9, Quantity_10) %>%
+  psych::alpha()
+```
+
+Knowledge = .90
+
+```{r}
+chronbach.df %>%
+  select(Knowledge_1, Knowledge_2, Knowledge_3, Knowledge_4,
+         Knowledge_5, Knowledge_6, Knowledge_7, Knowledge_8,
+         Knowledge_9.r, Knowledge_10, Knowledge_11.r, Knowledge_12,
+         Knowledge_13, Knowledge_14, Knowledge_15, Knowledge_16) %>%
+  psych::alpha()
+```
